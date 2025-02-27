@@ -1,0 +1,17 @@
+.card-header {
+    font-size: 1.25rem;
+    font-weight: bold;
+  }
+  
+  .card-body h3 {
+    color: #333;
+  }
+  
+  button {
+    margin-left: 10px;
+  }
+  
+  .alert {
+    margin-top: 15px;
+  }
+  
