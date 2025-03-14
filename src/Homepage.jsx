@@ -88,12 +88,6 @@ const HomePage = () => {
           </div>
         </div>
       </section>
-      <div id="Orders"><OrderSection /></div>
-      <div id="Track"><SupplierManagement /></div>
-      <div id="Customers"><CustomerManagement /></div>
-      <div id="Reports"><Reports /></div>
-      <div id="Invoice"><InvoiceManagement /></div>
-
     </div>
   );
 };

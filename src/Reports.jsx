@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import NavBar from "./NavBar"
 
 const Reports = () => {
   const [salesData, setSalesData] = useState([]);
@@ -68,7 +69,9 @@ const Reports = () => {
   };
 
   return (
-    <div className="container my-5">
+    <>
+    {<NavBar />}
+    <div className="container custom-margins " style={{marginTop:"150px"}}>
       <h2 className="text-center">Business Reports</h2>
 
       {/* Buttons to Show Different Reports */}
@@ -197,6 +200,7 @@ const Reports = () => {
         </div>
       )}
     </div>
+    </>
   );
 };
 
