@@ -1,6 +1,7 @@
 import React, { useState } from "react";
+import NavBar from "./NavBar";
 
-const OrderSection = () => {
+const OrderPage = () => {
   // States to hold orders and form inputs
   const [orders, setOrders] = useState([]);
   const [orderDetails, setOrderDetails] = useState({
@@ -47,7 +48,9 @@ const OrderSection = () => {
   };
 
   return (
-    <div className="container my-5">
+    <div className="container">
+      {<NavBar />}
+    <div className="container custom-margins " style={{marginTop:"150px"}}>
       <h2 className="text-center">Order Management</h2>
 
       {/* Order Form to Create New Order */}
@@ -165,7 +168,8 @@ const OrderSection = () => {
         </table>
       </div>
     </div>
+    </div>
   );
 };
 
-export default OrderSection;
+export default OrderPage;

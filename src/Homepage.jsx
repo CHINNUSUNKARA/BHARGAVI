@@ -1,14 +1,15 @@
 import React from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import Slider from "react-slick";
-import OrderSection from "./OrderSection";
+import OrderSection from "./OrderPage";
 import SupplierManagement from "./SupplierManagement";
 import CustomerManagement from "./CustomerManagement";
 import Reports from "./Reports";
 import InvoiceManagement from "./InvoiceManagement";
+import NavBar from "./NavBar";
 
 const HomePage = () => {
   const stockData = [
@@ -38,102 +39,10 @@ const HomePage = () => {
 
   const navigate = useNavigate(); // Hook for navigation
 
-  const handleLogout = () => {
-    console.log("Logout clicked");
-    // Add your logout logic here, e.g., clearing tokens, etc.
-    alert("Logged out successfully!");
-    navigate("/"); // Navigate to the login page
-  };
 
   return (
     <div>
-      {/* Navigation Bar */}
-      <nav className="navbar navbar-expand-lg navbar-light bg-light fixed-top">
-        <div className="container d-flex justify-content-between align-items-center">
-          {/* Brand Name */}
-          <Link className="navbar-brand" to="/">
-            My App
-          </Link>
-
-          {/* Social Media Icons */}
-          <div className="social-icons text-center">
-            <a
-              href="https://www.instagram.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-dark mx-2"
-            >
-              <i className="fab fa-instagram"></i>
-            </a>
-            <a
-              href="https://www.facebook.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-dark mx-2"
-            >
-              <i className="fab fa-facebook"></i>
-            </a>
-            <a
-              href="https://www.twitter.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-dark mx-2"
-            >
-              <i className="fab fa-twitter"></i>
-            </a>
-          </div>
-
-          {/* Logout Button */}
-          <button className="btn btn-danger" onClick={handleLogout}>
-            Logout
-          </button>
-        </div>
-      </nav>
-
-      {/* Second Navbar */}
-      <nav className="navbar navbar-expand-lg navbar-dark bg-dark fixed-top" style={{ top: '55px' }}>
-        <div className="container">
-          <p className="navbar-brand">
-            Iron & Cement Trade
-          </p>
-          <button
-            className="navbar-toggler"
-            type="button"
-            data-bs-toggle="collapse"
-            data-bs-target="#navbarNav"
-            aria-controls="navbarNav"
-            aria-expanded="false"
-            aria-label="Toggle navigation"
-          >
-            <span className="navbar-toggler-icon"></span>
-          </button>
-          <div className="collapse navbar-collapse" id="navbarNav">
-            <ul className="navbar-nav ms-auto">
-              <li className="nav-item">
-                <a className="nav-link" href="/HomePage">
-                  Home
-                </a>
-              </li>
-              <li className="nav-item">
-                <a className="nav-link" href="#Orders">
-                  Orders
-                </a>
-              </li>
-              <li className="nav-item">
-                <a className="nav-link" href="#services">
-                  Services
-                </a>
-              </li>
-              <li className="nav-item">
-                <a className="nav-link" href="#contact">
-                  Contact
-                </a>
-              </li>
-            </ul>
-          </div>
-        </div>
-      </nav>
-
+      {<NavBar />}
       {/* Hero Section */}
       <section className="hero custom-margins">
   <div className="container">
