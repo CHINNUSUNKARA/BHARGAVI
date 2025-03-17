@@ -1,17 +1,26 @@
 import React, { useState } from "react";
 import jsPDF from "jspdf"; // Import jsPDF for PDF generation
-import NavBar from "./NavBar";
+import NavBar from "./NavBar";  
+import { useLocation } from 'react-router-dom';
 
 const InvoiceManagement = () => {
-  const [orderDetails, setOrderDetails] = useState({
+  
+  // Default orderDetails (if no state is passed)
+  const defaultOrderDetails = {
     customerName: "",
     email: "",
     phoneNumber: "",
-    orderItems: [{ product: "", price: 0, quantity: 1 }],
-    orderDate: new Date(),
-  });
+    orderItems: [{ product: "", price: "", quantity: "" }],  // Default orderItems
+  };
 
-  const [invoiceHistory, setInvoiceHistory] = useState([]);
+  // // Use useLocation to get the passed state
+  // const { state } = useLocation();
+  // const orderDetailsFromState = state?.orderDetails;
+
+  // Use the orderDetails from state or fallback to the default
+  const [orderDetails, setOrderDetails] = useState( defaultOrderDetails);
+
+  const [invoiceHistory, setInvoiceHistory] = useState([]); // Always initialize as an array
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState(null);
 
@@ -50,7 +59,6 @@ const InvoiceManagement = () => {
       email: orderDetails.email,
       phoneNumber: orderDetails.phoneNumber,
       orderItems: orderDetails.orderItems,
-      orderDate: orderDetails.orderDate,
       totalAmount,
       tax,
       totalWithTax,
@@ -221,19 +229,21 @@ const InvoiceManagement = () => {
                   placeholder="Enter price"
                 />
                 <input
-                  type="number"
-                  className="form-control"
-                  value={item.quantity}
-                  onChange={(e) =>
-                    setOrderDetails({
-                      ...orderDetails,
-                      orderItems: orderDetails.orderItems.map((i, idx) =>
-                        idx === index ? { ...i, quantity: e.target.value } : i
-                      ),
-                    })
-                  }
-                  placeholder="Enter quantity"
-                />
+                    type="number"
+                    className="form-control"
+                    value={item.quantity}
+                    onChange={(e) => {
+                      const updatedQuantity = e.target.value;
+                      setOrderDetails({
+                        ...orderDetails,
+                        orderItems: orderDetails.orderItems.map((i, idx) =>
+                          idx === index ? { ...i, quantity: updatedQuantity } : i
+                        ),
+                      });
+                    }}
+                    placeholder="Enter quantity"
+                  />
+
                 <button
                   type="button"
                   className="btn btn-danger my-2"

@@ -8,8 +8,10 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "@fortawesome/fontawesome-free/css/all.min.css"; // Import Font Awesome
 import SupplierManagement from "./SupplierManagement";
 import CustomerManagement from "./CustomerManagement";
-import Reports from "./Reports";
 import InvoiceManagement from "./InvoiceManagement";
+import StockReport from "./StockReport";
+import StockInventory from "./StockInventory";
+import StockAdd from "./StockAdd";
 
 
 const App = () => {
@@ -27,8 +29,11 @@ const App = () => {
         <Route path="/OrderPage" element={<OrderPage />} />        
         <Route path="/Supplier" element={<SupplierManagement />} />        
         <Route path="/Customer" element={<CustomerManagement />} />        
-        <Route path="/Reports" element={<Reports />} />        
-        <Route path="/Invoice" element={<InvoiceManagement />} />        
+        <Route path="/StockInventory" element={<StockInventory />} />        
+        <Route path="/Invoice" element={<InvoiceManagement />} />   
+        <Route path="/Stock" element={<StockReport />} />    
+        <Route path="/StockAdd" element={<StockAdd />} />    
+
       </Routes>
     </Router>
     </>

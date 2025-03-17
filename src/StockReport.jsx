@@ -1,7 +1,7 @@
-import React, { useState } from "react";
-import NavBar from "./NavBar"
+import React,{useState} from 'react'
+import NavBar from './NavBar'
 
-const Reports = () => {
+const StockReport = () => {
   const [salesData, setSalesData] = useState([]);
   const [stockData, setStockData] = useState([]);
   const [profitLossData, setProfitLossData] = useState([]);
@@ -204,4 +204,4 @@ const Reports = () => {
   );
 };
 
-export default Reports;
+export default StockReport
