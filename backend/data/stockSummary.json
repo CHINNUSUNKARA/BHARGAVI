@@ -1,0 +1,37 @@
+[
+  {
+    "Iron": {
+      "24mm": "",
+      "16mm": "",
+      "12mm": "",
+      "10mm": "",
+      "8mm": ""
+    }
+  },
+  {
+    "Cement": {
+      "Nagarjuna": "100",
+      "Ramco": "100",
+      "Ambuja": "",
+      "Sagar": "",
+      "UltraTech": ""
+    }
+  },
+  {
+    "Pipes": {
+      "GpPipes": "",
+      "KalaiPipes": "",
+      "RoundPipes": "",
+      "StraightPipes": ""
+    }
+  },
+  {
+    "Sheets": {
+      "24g": "",
+      "22g": "",
+      "20g": "",
+      "18g": "",
+      "16g": ""
+    }
+  }
+]

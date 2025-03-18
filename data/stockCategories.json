@@ -1,0 +1,19 @@
+[
+    {
+      "id": 1,
+      "category": "Iron Rods",
+      "subCategories": [
+        { "id": 1, "name": "20mm", "quantity": 100 },
+        { "id": 2, "name": "16mm", "quantity": 150 }
+      ]
+    },
+    {
+      "id": 2,
+      "category": "Cement Bags",
+      "subCategories": [
+        { "id": 1, "name": "Nagarjuna", "quantity": 500 },
+        { "id": 2, "name": "Ramco", "quantity": 300 }
+      ]
+    }
+  ]
+  

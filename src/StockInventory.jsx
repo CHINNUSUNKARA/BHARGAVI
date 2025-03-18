@@ -11,7 +11,12 @@ const StockInventory = () => {
     const fetchStockData = async () => {
       try {
         const response = await axios.get("http://localhost:5000/api/dashboard/stock");
-        setStockData(response.data);
+        // Ensure that the stock data has a valid structure before setting it
+        if (Array.isArray(response.data) && response.data.length > 0) {
+          setStockData(response.data);
+        } else {
+          throw new Error("Invalid data format or empty data received.");
+        }
       } catch (err) {
         setError(err.message);
       } finally {
@@ -43,21 +48,26 @@ const StockInventory = () => {
       <div className="container custom-margins" style={{ marginTop: "150px" }}>
         <h1 className="text-center my-4">Stock Inventory</h1>
         <Row>
-          {stockData.map((category, index) => {
-            // Get the first key of each category (Iron, Cement, etc.)
-            const categoryName = Object.keys(category)[1];
+          {stockData.map((item, index) => {
+            const categoryName = Object.keys(item)[0]; // Get the category name (Iron, Cement, etc.)
+            const categoryDetails = item[categoryName];
+
             return (
-              <Col sm={12} md={6} lg={4} key={index}>
+              <Col sm={12} md={6} lg={3} key={index}>
                 <Card className="mb-4">
                   <Card.Body>
                     <Card.Title>{categoryName}</Card.Title>
                     {/* Loop through the subcategories (sizes or brands) */}
-                    {Object.keys(category[categoryName]).map((subCategory, idx) => (
-                      <div key={idx}>
-                        <Card.Subtitle className="mb-2 'font-weight:bold'">{subCategory}</Card.Subtitle>
-                        <p>Quantity: {category[categoryName][subCategory] || 'N/A'}</p>
-                      </div>
-                    ))}
+                    {categoryDetails &&
+                      Object.keys(categoryDetails).map((subCategory, idx) => (
+                        <div key={idx}>
+                          <Card.Subtitle className="mb-2" style={{ fontWeight: 'bold' }}>
+                            {subCategory}
+                          </Card.Subtitle>
+                          <p>Quantity: {categoryDetails[subCategory] || 'N/A'}</p>
+                        </div>
+                      ))
+                    }
                   </Card.Body>
                 </Card>
               </Col>

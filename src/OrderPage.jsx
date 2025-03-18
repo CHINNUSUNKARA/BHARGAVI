@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import NavBar from "./NavBar";
 import { useNavigate } from "react-router-dom";
-import InvoiceManagement from "./InvoiceManagement";
 
 const OrderPage = () => {
   const navigate = useNavigate();
