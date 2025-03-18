@@ -54,8 +54,8 @@ const StockInventory = () => {
                     {/* Loop through the subcategories (sizes or brands) */}
                     {Object.keys(category[categoryName]).map((subCategory, idx) => (
                       <div key={idx}>
-                        <Card.Subtitle className="mb-2 text-muted">{subCategory}</Card.Subtitle>
-                        <p><strong>Quantity:</strong> {category[categoryName][subCategory] || 'N/A'}</p>
+                        <Card.Subtitle className="mb-2 'font-weight:bold'">{subCategory}</Card.Subtitle>
+                        <p>Quantity: {category[categoryName][subCategory] || 'N/A'}</p>
                       </div>
                     ))}
                   </Card.Body>
