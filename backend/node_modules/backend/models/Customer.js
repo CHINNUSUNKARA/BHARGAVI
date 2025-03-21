@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const customerSchema = new mongoose.Schema({
   id: { 
     type: Number, 
-    required: true, 
+    required: false, // 'id' is optional, MongoDB will generate a unique '_id' if not provided
     unique: true, // Ensure that the 'id' is unique
   },
   name: { 
