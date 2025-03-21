@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
 require('dotenv').config(); // Load environment variables from a .env file
+const { v4: uuidv4 } = require('uuid'); // Add this line at the top of the file
 
 // Models
 const Customer = require('./models/Customer');
@@ -56,9 +57,26 @@ app.get('/api/dashboard/customers/name/:name', async (req, res) => {
 
 
 app.post('/api/dashboard/customers', async (req, res) => {
-  const newCustomer = new Customer(req.body);
-  await newCustomer.save();
-  res.status(201).json(newCustomer);
+  try {
+    console.log('Request body:', req.body); // Log the request body
+
+    // Remove _id field if it is not a valid ObjectId
+    if (req.body._id && !mongoose.Types.ObjectId.isValid(req.body._id)) {
+      delete req.body._id;
+    }
+
+    // Generate a unique id if not provided
+    if (!req.body._id) {
+      req.body.id = uuidv4();
+    }
+
+    const newCustomer = new Customer(req.body);
+    await newCustomer.save();
+    res.status(201).json(newCustomer);
+  } catch (error) {
+    console.error('Error saving new customer:', error.message); // Log the error message
+    res.status(500).json({ error: 'Failed to save new customer', details: error.message }); // Include error details in the response
+  }
 });
 
 app.put('/api/dashboard/customers/:id', async (req, res) => {
@@ -192,4 +210,3 @@ app.delete('/api/dashboard/stocks/:id', async (req, res) => {
 app.listen(port, () => {
   console.log(`Server running on http://localhost:${port}`);
 });
-  
