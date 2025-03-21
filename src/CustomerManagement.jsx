@@ -11,9 +11,9 @@ const CustomerManagement = () => {
     phone: "",
     address: "",
   });
-  const [editCustomerId, setEditCustomerId] = useState(null);
+  const [editCustomerId, setEditCustomerId] = useState(null); // Initialize as null to indicate no editing by default
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedCustomer, setSelectedCustomer] = useState(null); 
+  const [selectedCustomer, setSelectedCustomer] = useState(null);
 
   // Fetch customers from API on initial load
   useEffect(() => {
@@ -33,27 +33,34 @@ const CustomerManagement = () => {
 
     fetchCustomers();
   }, []);
-
-  // Filter customers based on the search term
   useEffect(() => {
+    // Filter customers based on the search term
     if (searchTerm) {
       const filtered = customers.filter((customer) =>
         customer.name.toLowerCase().includes(searchTerm.toLowerCase())
       );
       setFilteredCustomers(filtered);
     } else {
-      setFilteredCustomers([]); // If no search term, hide the table
+      setFilteredCustomers([]); // Hide unfiltered customers if no search term
     }
   }, [searchTerm, customers]);
 
-// Open the modal to edit the customer
-const openModal = (customer) => {
-  setSelectedCustomer(customer);  // Store the selected customer for reference
-  setCustomerDetails(customer);   // Set form fields with the selected customer's data
-  setEditCustomerId(customer.id); // Set the edit ID to know that it's an update
-  setIsModalOpen(true);            // Open the modal
-};
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value);
+  };
 
+  // Open the modal to edit the customer
+  const openModal = (customer) => {
+    setSelectedCustomer(customer); // Store the selected customer for reference
+    setCustomerDetails({
+      name: customer.name,
+      email: customer.email,
+      phone: customer.phone,
+      address: customer.address,
+    }); // Set form fields with the selected customer's data
+    setEditCustomerId(customer._id); // Set the edit ID to know that it's an update
+    setIsModalOpen(true); // Open the modal
+  };
 
   const closeModal = () => {
     setIsModalOpen(false);
@@ -76,22 +83,29 @@ const openModal = (customer) => {
         ? `http://localhost:5000/api/dashboard/customers/${editCustomerId}`
         : "http://localhost:5000/api/dashboard/customers";
   
+      console.log("Saving customer:", newCustomer); // Log the customer details
+      console.log("API URL:", url); // Log the API URL
+      console.log("Method:", method); // Log the method
+  
       // Make the API request
       const response = await fetch(url, {
         method: method,
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(newCustomer),
+        body: JSON.stringify(newCustomer), // Ensure you're stringifying the data
       });
+  
+      console.log("Response status:", response.status); // Log the response status
   
       if (response.ok) {
         const updatedCustomer = await response.json(); // Get the customer from the response
+        console.log("Updated customer:", updatedCustomer); // Log the updated customer
   
         // If we're editing, update the customer list locally
         if (editCustomerId) {
           const updatedCustomers = customers.map((customer) =>
-            customer.id === editCustomerId ? updatedCustomer : customer
+            customer._id === editCustomerId ? updatedCustomer : customer
           );
           setCustomers(updatedCustomers);
         } else {
@@ -110,6 +124,8 @@ const openModal = (customer) => {
         });
         setEditCustomerId(null);
       } else {
+        const errorText = await response.text(); // Get the error text from the response
+        console.error("Error saving customer:", errorText); // Log the error text
         alert("Error saving customer!");
       }
     } catch (error) {
@@ -117,8 +133,6 @@ const openModal = (customer) => {
       alert("Failed to save customer.");
     }
   };
-  
-  
 
   // Handle deleting the customer details
   const handleDeleteCustomer = async (id) => {
@@ -128,7 +142,7 @@ const openModal = (customer) => {
       });
 
       if (response.ok) {
-        const filteredCustomers = customers.filter((customer) => customer.id !== id);
+        const filteredCustomers = customers.filter((customer) => customer._id !== id); // Use _id for filtering
         setCustomers(filteredCustomers); // Update customer list after deletion
         setIsModalOpen(false);
         alert("Customer deleted successfully.");
@@ -140,7 +154,6 @@ const openModal = (customer) => {
       alert("Failed to delete customer.");
     }
   };
-
 
   return (
     <div>
@@ -181,7 +194,7 @@ const openModal = (customer) => {
                 </div>
 
                 <div className="mb-3">
-                  <label className="form-label">phone</label>
+                  <label className="form-label">Phone</label>
                   <input
                     type="text"
                     className="form-control"
@@ -221,28 +234,36 @@ const openModal = (customer) => {
 
           <div className="col-md-8">
             <div className="my-4">
-              <h4>Search Customers</h4>
+              <h4 >Search Customers</h4>
               <input
-                type="search"
-                placeholder="Search by customer name"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="form-control"
-              />
-              {filteredCustomers.length > 0 && (
+                  type="text"
+                  placeholder="Search customers"
+                  className="form-control"
+                  value={searchTerm}
+                  onChange={handleSearchChange}
+                />
+              {filteredCustomers.length === 0  ? (
+                        <p>No customers found</p>
+                      ) : (
+                        <ul>
+                      {filteredCustomers.map((customer) => (
+                        <li key={customer._id}>{customer.name}</li> // Ensure you have a unique key (_id or similar)
+                      ))}
+                    </ul>
+                      )}
                 <table className="table table-bordered mt-4">
                   <thead>
                     <tr>
                       <th>Customer Name</th>
                       <th>Email</th>
-                      <th>phone</th>
+                      <th>Phone</th>
                       <th>Address</th>
                       <th>Actions</th>
                     </tr>
                   </thead>
                   <tbody>
                     {filteredCustomers.map((customer) => (
-                      <tr key={customer.id}>
+                      <tr key={customer._id}> {/* Use _id instead of id */}
                         <td>{customer.name}</td>
                         <td>{customer.email}</td>
                         <td>{customer.phone}</td>
@@ -259,7 +280,7 @@ const openModal = (customer) => {
                     ))}
                   </tbody>
                 </table>
-              )}
+              
               {filteredCustomers.length === 0 && searchTerm && (
                 <p>No customers found with that name.</p>
               )}
@@ -287,35 +308,34 @@ const openModal = (customer) => {
                 <div className="modal-body">
                   <p><strong>Name:</strong> {selectedCustomer.name}</p>
                   <p><strong>Email:</strong> {selectedCustomer.email}</p>
-                  <p><strong>phone:</strong> {selectedCustomer.phone}</p>
+                  <p><strong>Phone:</strong> {selectedCustomer.phone}</p>
                   <p><strong>Address:</strong> {selectedCustomer.address}</p>
                 </div>
                 <div className="modal-footer">
                   <button
                     type="button"
                     className="btn btn-danger"
-                    onClick={() => handleDeleteCustomer(selectedCustomer.id)}
+                    onClick={() => handleDeleteCustomer(selectedCustomer._id)}
                   >
                     Delete
                   </button>
                   <button
-                      type="button"
-                      className="btn btn-primary"
-                      onClick={() => {
-                        // Populate form fields with the selected customer's data
-                        setCustomerDetails({
-                          name: selectedCustomer.name,
-                          email: selectedCustomer.email,
-                          phone: selectedCustomer.phone,
-                          address: selectedCustomer.address,
-                        });
-                        setEditCustomerId(selectedCustomer.id); // Set the ID for the editing state
-                        setIsModalOpen(false); // Close the modal after setting the customer for editing
-                        console.log("Editing customer:", selectedCustomer); // Debug log
-                      }}
-                    >
-                      Edit
-                    </button>
+                    type="button"
+                    className="btn btn-primary"
+                    onClick={() => {
+                      // Populate form fields with the selected customer's data
+                      setCustomerDetails({
+                        name: selectedCustomer.name,
+                        email: selectedCustomer.email,
+                        phone: selectedCustomer.phone,
+                        address: selectedCustomer.address,
+                      });
+                      setEditCustomerId(selectedCustomer._id); // Set the ID for the editing state
+                      setIsModalOpen(false); // Close the modal after setting the customer for editing
+                    }}
+                  >
+                    Edit
+                  </button>
                   <button type="button" className="btn btn-secondary" onClick={closeModal}>
                     Close
                   </button>
