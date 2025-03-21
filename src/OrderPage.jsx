@@ -4,18 +4,64 @@ import { useNavigate } from "react-router-dom";
 
 const OrderPage = () => {
   const navigate = useNavigate();
-  
-  // States to hold orders and form inputs
-  const [orders, setOrders] = useState([]);
-  const [orderDetails, setOrderDetails] = useState({
-    customerName: "",
-    Email: "",
-    Phone: "",
-    status: "pending",
-    deliveryDetails: "",
-  });
 
-  const [orderHistory, setOrderHistory] = useState([]);
+  const [customers, setCustomers] = useState([]);
+  const [customerDetails, setCustomerDetails] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    preferences: "",
+  });
+  const [editCustomerId, setEditCustomerId] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false); 
+  const [selectedCustomer, setSelectedCustomer] = useState(null); 
+
+    // Load customers from localStorage on component mount
+    useEffect(() => {
+      const savedCustomers = localStorage.getItem("customers");
+      if (savedCustomers) {
+        setCustomers(JSON.parse(savedCustomers));
+      }
+    }, []);
+  
+    // Save customers to localStorage whenever the list changes
+    useEffect(() => {
+      if (customers.length > 0) {
+        localStorage.setItem("customers", JSON.stringify(customers));
+      }
+    }, [customers]);
+  
+  
+  
+  const handleSaveCustomer = () => {
+    if (editCustomerId !== null) {
+      const updatedCustomers = customers.map((customer) =>
+        customer.id === editCustomerId ? { ...customer, ...customerDetails } : customer
+      );
+      setCustomers(updatedCustomers);
+      setEditCustomerId(null);
+    } else {
+      const newCustomer = {
+        ...customerDetails,
+        id: customers.length + 1,
+      };
+      setCustomers([...customers, newCustomer]);
+    }
+
+    setCustomerDetails({
+      name: "",
+      email: "",
+      phone: "",
+      preferences: "",
+    });
+  };
+
+  const handleDeleteCustomer = (id) => {
+    const filteredCustomers = customers.filter((customer) => customer.id !== id);
+    setCustomers(filteredCustomers);
+    setIsModalOpen(false); 
+  };
+
 
   // Load data from API on component mount
   useEffect(() => {
@@ -23,8 +69,7 @@ const OrderPage = () => {
       try {
         const response = await fetch("http://localhost:5000/api/dashboard/orders");
         const data = await response.json();
-        setOrders(data);
-        setOrderHistory(data); // Use the same orders for history (if needed, separate logic)
+        setCustomers(data);
       } catch (error) {
         console.error("Error fetching orders:", error);
       }
@@ -32,89 +77,60 @@ const OrderPage = () => {
     fetchOrders();
   }, []);
 
-  // Handler to create a new order
-  const handleCreateOrder = async () => {
-    const newOrder = { ...orderDetails, orderId: orders.length + 1 };
+  // Handler to create a new customer
+  const handleCreateCustomer = async () => {
+    const newCustomer = { ...customerDetails, customerId: customers.length + 1 };
 
     try {
-      const response = await fetch("http://localhost:5000/api/dashboard/orders", {
+      const response = await fetch("http://localhost:5000/api/dashboard/customers", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(newOrder),
+        body: JSON.stringify(newCustomer),
       });
 
       if (response.ok) {
-        const createdOrder = await response.json();
-        setOrders([...orders, createdOrder]);
-        setOrderDetails({
+        setCustomers([...customers, newCustomer]);  // Add the new customer to the customers list
+        setCustomerDetails({
           customerName: "",
-          Email: "",
-          Phone: "",
-          status: "pending",
+          email: "",
+          phone: "",
           deliveryDetails: "",
         });
-        alert("Order created successfully!");
+        alert("Customer created successfully!");
       } else {
-        console.error("Failed to create order");
+        console.error("Failed to create customer");
+        alert("Failed to create customer. Please try again.");
       }
     } catch (error) {
-      console.error("Error creating order:", error);
+      console.error("Error creating customer:", error);
+      alert("Error creating customer. Please try again.");
     }
   };
+  
 
-  // Handler to update order status
-  const handleUpdateOrderStatus = async (orderId, status) => {
-    const updatedOrder = { status };
-
-    try {
-      const response = await fetch(`http://localhost:5000/api/dashboard/orders/${orderId}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(updatedOrder),
-      });
-
-      if (response.ok) {
-        const updatedOrders = orders.map((order) =>
-          order.orderId === orderId ? { ...order, status } : order
-        );
-        setOrders(updatedOrders);
-      } else {
-        console.error("Failed to update order status");
-      }
-    } catch (error) {
-      console.error("Error updating order status:", error);
-    }
-  };
-
-  // Handler to generate the bill and navigate to the InvoicePage
-  const handleNavigate = () => {
-    navigate('/Invoice', { state: { orderDetails } });
-  };
 
   return (
     <div className="container">
       <NavBar />
       <div className="container custom-margins" style={{ marginTop: "150px" }}>
-        <h2 className="text-center">Order Management</h2>
+        <h2 className="text-center">Customer Management</h2>
 
         <div className="row">
-          {/* Create New Order Section */}
+          {/* Create New Customer Section */}
           <div className="col-md-6">
             <div className="my-4">
-              <h4>Create New Order</h4>
+              <h4>Create New Customer</h4>
               <form>
                 <div className="mb-3">
                   <label className="form-label">Customer Name</label>
                   <input
                     type="text"
                     className="form-control"
-                    value={orderDetails.customerName}
+                    value={customerDetails.customerName}
                     onChange={(e) =>
-                      setOrderDetails({ ...orderDetails, customerName: e.target.value })
+                      setCustomerDetails({ ...customerDetails, customerName: e.target.value })
                     }
                     placeholder="Enter customer name"
                   />
@@ -125,9 +141,9 @@ const OrderPage = () => {
                   <input
                     type="email"
                     className="form-control"
-                    value={orderDetails.Email}
+                    value={customerDetails.email}
                     onChange={(e) =>
-                      setOrderDetails({ ...orderDetails, Email: e.target.value })
+                      setCustomerDetails({ ...customerDetails, email: e.target.value })
                     }
                     placeholder="Enter email address"
                   />
@@ -138,11 +154,11 @@ const OrderPage = () => {
                   <input
                     type="tel"
                     className="form-control"
-                    value={orderDetails.Phone}
-                    placeholder="Enter Phone Number"
+                    value={customerDetails.phone}
                     onChange={(e) =>
-                      setOrderDetails({ ...orderDetails, Phone: e.target.value })
+                      setCustomerDetails({ ...customerDetails, phone: e.target.value })
                     }
+                    placeholder="Enter phone number"
                   />
                 </div>
 
@@ -151,9 +167,9 @@ const OrderPage = () => {
                   <input
                     type="text"
                     className="form-control"
-                    value={orderDetails.deliveryDetails}
+                    value={customerDetails.deliveryDetails}
                     onChange={(e) =>
-                      setOrderDetails({ ...orderDetails, deliveryDetails: e.target.value })
+                      setCustomerDetails({ ...customerDetails, deliveryDetails: e.target.value })
                     }
                     placeholder="Enter delivery details"
                   />
@@ -162,15 +178,13 @@ const OrderPage = () => {
                 <button
                   type="button"
                   className="btn btn-primary"
-                  onClick={handleCreateOrder}
+                  onClick={handleCreateCustomer}
                 >
-                  Create Order
+                  Create Customer
                 </button>
               </form>
             </div>
           </div>
-
-          {/* Order History Section */}
           <div className="col-md-6">
             <div className="my-4">
               <h4>Order History</h4>
@@ -185,7 +199,7 @@ const OrderPage = () => {
                     <th>Bill Generation</th>
                   </tr>
                 </thead>
-                <tbody>
+                {/* <tbody>
                   {orderHistory.map((order) => (
                     <tr key={order.orderId}>
                       <td>{order.orderId}</td>
@@ -203,14 +217,14 @@ const OrderPage = () => {
                       <td>
                         <button
                           className="btn btn-warning"
-                          onClick={handleNavigate}
+                          onClick={() => handleNavigate(order)}
                         >
                           Generate Bill
                         </button>
                       </td>
                     </tr>
                   ))}
-                </tbody>
+                </tbody> */}
               </table>
             </div>
           </div>

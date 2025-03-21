@@ -8,7 +8,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "@fortawesome/fontawesome-free/css/all.min.css"; // Import Font Awesome
 import SupplierManagement from "./SupplierManagement";
 import CustomerManagement from "./CustomerManagement";
-import InvoiceManagement from "./InvoiceManagement";
+import InvoiceManagement from "./components/InvoiceManagement";
 import StockReport from "./StockReport";
 import StockInventory from "./StockInventory";
 import StockAdd from "./StockAdd";
