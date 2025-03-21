@@ -242,15 +242,6 @@ const CustomerManagement = () => {
                   value={searchTerm}
                   onChange={handleSearchChange}
                 />
-              {filteredCustomers.length === 0  ? (
-                        <p>No customers found</p>
-                      ) : (
-                        <ul>
-                      {filteredCustomers.map((customer) => (
-                        <li key={customer._id}>{customer.name}</li> // Ensure you have a unique key (_id or similar)
-                      ))}
-                    </ul>
-                      )}
                 <table className="table table-bordered mt-4">
                   <thead>
                     <tr>
