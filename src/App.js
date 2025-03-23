@@ -12,6 +12,7 @@ import InvoiceManagement from "./components/InvoiceManagement";
 import StockReport from "./StockReport";
 import StockInventory from "./StockInventory";
 import StockAdd from "./StockAdd";
+// import ItemForm from "./ItemForm";
 
 
 const App = () => {
@@ -31,7 +32,8 @@ const App = () => {
         <Route path="/Customer" element={<CustomerManagement />} />        
         <Route path="/StockInventory" element={<StockInventory />} />        
         <Route path="/Invoice" element={<InvoiceManagement />} />   
-        <Route path="/Stock" element={<StockReport />} />    
+        <Route path="/Stock" element={<StockReport />} />   
+        {/* <Route path="/Items" element={<ItemForm />} />      */}
         <Route path="/StockAdd" element={<StockAdd />} />    
 
       </Routes>

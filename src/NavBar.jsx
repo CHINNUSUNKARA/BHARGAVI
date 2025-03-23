@@ -81,6 +81,11 @@ const NavBar = () => {
                 </Link>
               </li>
               <li className="nav-item">
+                <Link className="nav-link" to="/Customer">
+                  Customer
+                </Link>
+              </li>
+              <li className="nav-item">
                 <Link className="nav-link" to="/OrderPage">
                   Orders
                 </Link>
@@ -88,11 +93,6 @@ const NavBar = () => {
               <li className="nav-item">
                 <Link className="nav-link" to="/Supplier">
                 Supplier 
-                </Link>
-              </li>
-              <li className="nav-item">
-                <Link className="nav-link" to="/Customer">
-                  Customer
                 </Link>
               </li>
               <li className="nav-item">
@@ -105,6 +105,11 @@ const NavBar = () => {
                   Stock ADD
                 </Link>
               </li>
+              {/* <li className="nav-item">
+                <Link className="nav-link" to="/Items">
+                  Items ADD
+                </Link>
+              </li> */}
               <li className="nav-item">
                 <Link className="nav-link" to="/Stock">
                   Stock

@@ -1,12 +1,16 @@
 const mongoose = require('mongoose');
 
+// Define the schema for the Order model
 const orderSchema = new mongoose.Schema({
-  id: { type: Number, required: true },
-  customerId: { type: Number, required: true },
-  products: [{ type: String, required: true }],
-  totalAmount: { type: Number, required: true },
-  date: { type: Date, default: Date.now },
+  customerId: { type: mongoose.Schema.Types.ObjectId, ref: 'Customer', required: true },
+  itemName: { type: String, required: true },
+  itemBrand: { type: String, required: true },
+  itemQuantity: { type: Number, required: true },
+  itemPrice: { type: Number, required: true },
+  dateOfOrder: { type: Date, required: true },
 });
 
+// Create the Order model
 const Order = mongoose.model('Order', orderSchema);
+
 module.exports = Order;
