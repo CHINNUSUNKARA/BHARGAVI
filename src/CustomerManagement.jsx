@@ -7,6 +7,7 @@ const CustomerManagement = () => {
   const [filteredCustomers, setFilteredCustomers] = useState([]); // Store filtered (searched) customers
   const [customerDetails, setCustomerDetails] = useState({
     name: "",
+    surname: "",
     email: "",
     phone: "",
     address: "",
@@ -54,6 +55,7 @@ const CustomerManagement = () => {
     setSelectedCustomer(customer); // Store the selected customer for reference
     setCustomerDetails({
       name: customer.name,
+      surname: customer.surname,
       email: customer.email,
       phone: customer.phone,
       address: customer.address,
@@ -67,6 +69,7 @@ const CustomerManagement = () => {
     setSelectedCustomer(null);
     setCustomerDetails({
       name: "",
+      surname: "",
       email: "",
       phone: "",
       address: "",
@@ -118,6 +121,7 @@ const CustomerManagement = () => {
         // Reset the form and the edit state
         setCustomerDetails({
           name: "",
+          surname:"",
           email: "",
           phone: "",
           address: "",
@@ -158,7 +162,7 @@ const CustomerManagement = () => {
   return (
     <div>
       <NavBar />
-      <div className="container custom-margins" style={{ marginTop: "150px" }}>
+      <div className="container custom-margins" style={{  marginTop: "70px", marginLeft: '250px', padding: '20px', width: 'auto', overflow: 'hidden', height: '100vh' }}>
         <h2 className="text-center">Customer Management</h2>
 
         <div className="row">
@@ -176,6 +180,19 @@ const CustomerManagement = () => {
                       setCustomerDetails({ ...customerDetails, name: e.target.value })
                     }
                     placeholder="Enter customer name"
+                    required
+                  />
+                </div>
+                <div className="mb-3">
+                  <label className="form-label">Customer Surname</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    value={customerDetails.surname}
+                    onChange={(e) =>
+                      setCustomerDetails({ ...customerDetails, surname: e.target.value })
+                    }
+                    placeholder="Enter customer Surname"
                     required
                   />
                 </div>
@@ -255,7 +272,7 @@ const CustomerManagement = () => {
                   <tbody>
                     {filteredCustomers.map((customer) => (
                       <tr key={customer._id}> {/* Use _id instead of id */}
-                        <td>{customer.name}</td>
+                        <td>{customer.name + " " + customer.surname}</td>
                         <td>{customer.email}</td>
                         <td>{customer.phone}</td>
                         <td>{customer.address}</td>

@@ -18,6 +18,8 @@ const ironRoutes = require('./routes/iron');
 const cementRoutes = require('./routes/cement');
 const pipesRoutes = require('./routes/pipes');
 const sheetsRoutes = require('./routes/sheets');
+const supplierRoutes = require('./routes/SupplierRoutes'); // Import the supplier routes
+
 
 // Set up the routes
 app.use('/api/dashboard/items/iron', ironRoutes);
@@ -29,6 +31,8 @@ app.use('/api/dashboard/orders', orderRoutes);
 app.use('/api/dashboard/items', itemRoutes);
 app.use('/api/dashboard/stocks', stockCategoryRoutes);
 app.use('/api/dashboard/stock', stockSummaryRoutes);
+app.use('/api/dashboard/suppliers', supplierRoutes); // Prefix with '/api/dashboard/suppliers'
+
 
 // MongoDB URI from .env file
 const mongoURI = process.env.MONGO_URI;

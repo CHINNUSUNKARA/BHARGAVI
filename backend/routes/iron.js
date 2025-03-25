@@ -1,60 +1,74 @@
 const express = require('express');
 const router = express.Router();
+const { Iron } = require('../models/Item'); // Import Iron model
 
-// Sample Iron Data
-let ironItems = [
-    { size: "16mm", price: 500 },
-    { size: "12mm", price: 450 },
-    { size: "10mm", price: 400 },
-    { size: "8mm", price: 400 },
-    { size: "6mm", price: 400 },
-];
-
-// Get all iron items
-router.get('/', (req, res) => {
-    res.json(ironItems);
+// Create a new Iron item (POST)
+router.post('/', async (req, res) => {
+  const iron = new Iron(req.body);
+  try {
+    await iron.save();
+    res.send(iron);
+  } catch (err) {
+    res.status(500).send(err);
+  }
 });
 
-// Get specific iron item by size
-router.get('/:size', (req, res) => {
-    const ironItem = ironItems.find(item => item.size === req.params.size);
-    if (ironItem) {
-        res.json(ironItem);
-    } else {
-        res.status(404).json({ message: 'Iron item not found' });
-    }
+// Get all Iron items, optionally filter by brand (GET)
+router.get('/', async (req, res) => {
+  try {
+    const { brand } = req.query; // Get brand from query parameters
+    const filter = brand ? { brand } : {}; // If a brand is provided, filter by brand, else return all
+
+    const irons = await Iron.find(filter); // Fetch filtered or all items
+    res.json(irons);
+  } catch (err) {
+    res.status(500).send(err);
+  }
 });
 
-// Add a new iron item
-router.post('/', (req, res) => {
-    const { size, price } = req.body;
-    if (!size || !price) {
-        return res.status(400).json({ message: 'Size and price are required' });
+// Get a single Iron item by ID (GET)
+router.get('/:id', async (req, res) => {
+  try {
+    const iron = await Iron.findById(req.params.id); // Find the Iron by ID
+    if (!iron) {
+      return res.status(404).send({ message: 'Iron not found' });
     }
-    const newIronItem = { size, price };
-    ironItems.push(newIronItem);
-    res.status(201).json(newIronItem);
+    res.json(iron);
+  } catch (err) {
+    res.status(500).send(err);
+  }
 });
 
-// Update iron item by size
-router.put('/:size', (req, res) => {
-    const ironItem = ironItems.find(item => item.size === req.params.size);
-    if (!ironItem) {
-        return res.status(404).json({ message: 'Iron item not found' });
+// Update an Iron item by ID, optionally filter by brand (PUT)
+router.put('/:id', async (req, res) => {
+  try {
+    const { brand } = req.query; // Get brand from query parameters
+    const filter = brand ? { brand, _id: req.params.id } : { _id: req.params.id };
+
+    const iron = await Iron.findOneAndUpdate(filter, req.body, { new: true });
+    if (!iron) {
+      return res.status(404).send({ message: 'Iron not found' });
     }
-    const { price } = req.body;
-    ironItem.price = price;
-    res.json(ironItem);
+    res.json({ status: 'Iron updated', iron });
+  } catch (err) {
+    res.status(500).send(err);
+  }
 });
 
-// Delete an iron item by size
-router.delete('/:size', (req, res) => {
-    const index = ironItems.findIndex(item => item.size === req.params.size);
-    if (index === -1) {
-        return res.status(404).json({ message: 'Iron item not found' });
+// Delete an Iron item by ID, optionally filter by brand (DELETE)
+router.delete('/:id', async (req, res) => {
+  try {
+    const { brand } = req.query; // Get brand from query parameters
+    const filter = brand ? { brand, _id: req.params.id } : { _id: req.params.id };
+
+    const iron = await Iron.findOneAndDelete(filter);
+    if (!iron) {
+      return res.status(404).send({ message: 'Iron not found' });
     }
-    ironItems.splice(index, 1);
-    res.json({ message: 'Iron item deleted successfully' });
+    res.json({ status: 'Iron deleted' });
+  } catch (err) {
+    res.status(500).send(err);
+  }
 });
 
 module.exports = router;

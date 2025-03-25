@@ -1,0 +1,102 @@
+/* Navigation List */
+ul.list-unstyled {
+    padding-left: 0;
+    margin-top: 20px;
+  }
+  
+  ul.list-unstyled li {
+    transition: background-color 0.3s ease, transform 0.3s ease;
+  }
+  
+  ul.list-unstyled li:hover {
+    background-color: #007bff; /* Blue background on hover */
+    border-radius: 5px; /* Rounded corners */
+    transform: scale(1.05); /* Slight scale effect for hover */
+  }
+  
+  .nav-link {
+    display: block;
+    padding: 12px 20px; /* Add padding to make the links more clickable */
+    text-decoration: none;
+    color: white;
+    border-radius: 5px;
+    background-color: #343a40; /* Dark background for the nav items */
+    font-weight: 500; /* Slightly bold text */
+    transition: all 0.3s ease; /* Smooth transition */
+  }
+  
+  .nav-link:hover {
+    color: white; /* Ensure text remains white */
+    background-color: #007bff; /* Blue background on hover */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Shadow on hover for depth */
+    transform: translateX(5px); /* Slight right movement on hover */
+  }
+  
+  .nav-link:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.5); /* Focus state with blue outline */
+  }
+  
+  /* Optional: Additional spacing for each list item */
+  ul.list-unstyled li + li {
+    margin-top: 10px;
+  }
+
+
+  /* Navbar Styling */
+.custom-navbar {
+    background-color: #88add4; /* Light gray background color */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow effect */
+    padding: 15px 20px; /* Add padding to give more space inside the navbar */
+    z-index: 2; /* Ensure the navbar stays above other content */
+  }
+  
+  .navbar-logo {
+    max-height: 50px; /* Adjust logo height */
+    width: auto;
+  }
+  
+  .navbar-toggler-icon {
+    background-color: #007bff; /* Make the hamburger icon blue */
+  }
+  
+  .social-icons a {
+    font-size: 18px; /* Increase the size of the social media icons */
+    transition: transform 0.3s ease-in-out;
+  }
+  
+  .social-icons a:hover {
+    transform: scale(1.2); /* Scale up icons slightly on hover */
+    color: #007bff; /* Change color on hover */
+  }
+  
+  .navbar-nav .nav-item .nav-link {
+    padding: 10px 15px;
+    font-weight: 500;
+    color: #343a40; /* Dark text color */
+    transition: color 0.3s ease;
+  }
+  
+  .navbar-nav .nav-item .nav-link:hover {
+    color: #007bff; /* Blue color on hover */
+    text-decoration: underline; /* Underline on hover */
+  }
+  
+  .navbar-nav .nav-item .nav-link:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.5); /* Add a focus state with blue outline */
+  }
+  
+  /* Spacing and Alignment */
+  .navbar-nav {
+    align-items: center;
+  }
+  
+  .navbar-light .navbar-nav .nav-link {
+    color: #343a40;
+  }
+  
+  .navbar-toggler {
+    border-color: #007bff; /* Make the navbar toggler (hamburger icon) border blue */
+  }
+  

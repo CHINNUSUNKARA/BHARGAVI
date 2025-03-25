@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom"; // Import useNavigate for navigation
-import { signInWithGoogle } from "./Firebase"; // Ensure this is correctly imported
 import "bootstrap/dist/css/bootstrap.min.css";
 
 const LoginPage = () => {
@@ -9,46 +8,27 @@ const LoginPage = () => {
   const [error, setError] = useState("");
   const navigate = useNavigate(); // Initialize useNavigate
 
-  // Default credentials
-  const defaultCredentials = {
-    email: "admin@example.com",
-    password: "admin123",
-  };
 
   const handleLogin = (e) => {
     e.preventDefault();
 
     // Validate credentials
-    if (email === defaultCredentials.email && password === defaultCredentials.password) {
-      console.log("Login successful with default credentials");
-      alert("Login successful!");
+    if (email === 'Bhargavi@7007' && password === 'BhargaviSunkara') {
+      console.log("Login successful as User!");
       navigate("/HomePage"); // Navigate to the Home page
-    } else {
-      setError("Invalid email or password");
+    } else if (email === 'Posiyya@7007' && password === 'PosiyyaSunkara') {
+      console.log("Login successful as Admin!");
+      navigate("/AdminPage");
     }
   };
 
-  const handleGoogleSignIn = async () => {
-    try {
-      const user = await signInWithGoogle();
-      if (user) {
-        console.log("Logged in as:", user.displayName);
-        alert(`Welcome, ${user.displayName}!`);
-        navigate("/home"); // Navigate to the Home page
-      }
-    } catch (err) {
-      console.error("Google Sign-In error:", err);
-      setError("Google Sign-In failed. Please try again.");
-    }
-  };
-  
 
   return (
-    <div className="container mt-5">
-      <h2 className="text-center">Login</h2>
+    <div className="container mt-5 w-50 p-3 border border-primary rounded shadow p-3 mb-5 bg-white rounded ">
+      <h2 className="text-center mb-4 ">Login Page</h2>
       <form className="mt-4" onSubmit={handleLogin}>
         {error && <div className="alert alert-danger">{error}</div>}
-        <div className="mb-3">
+        <div className="mb-3 ">
           <label htmlFor="email" className="form-label">
             Email address
           </label>
@@ -77,11 +57,6 @@ const LoginPage = () => {
         <button type="submit" className="btn btn-primary w-100">
           Login
         </button>
-        <div className="mt-3 text-center">
-          <button type="button" className="btn btn-danger w-100" onClick={handleGoogleSignIn}>
-            Sign In with Google
-          </button>
-        </div>
       </form>
     </div>
   );

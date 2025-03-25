@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import NavBar from "./NavBar";
+import { getSuppliers, addSupplier, updateSupplier} from "./services/suppliersApi"; // Import API functions
 
 const SupplierManagement = () => {
   const [suppliers, setSuppliers] = useState([]);
@@ -12,40 +13,37 @@ const SupplierManagement = () => {
   });
 
   const [editSupplierId, setEditSupplierId] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false); 
-  const [selectedSupplier, setSelectedSupplier] = useState(null); 
 
-  // Load suppliers from localStorage on component mount
+  // Load suppliers from API on component mount
   useEffect(() => {
-    const savedSuppliers = localStorage.getItem("suppliers");
-    if (savedSuppliers) {
-      setSuppliers(JSON.parse(savedSuppliers));
-    }
+    const fetchSuppliers = async () => {
+      try {
+        const suppliersData = await getSuppliers();
+        setSuppliers(suppliersData);
+      } catch (error) {
+        console.error("Error fetching suppliers", error);
+      }
+    };
+    fetchSuppliers();
   }, []);
 
-  // Save suppliers to localStorage whenever the list changes
-  useEffect(() => {
-    if (suppliers.length > 0) {
-      localStorage.setItem("suppliers", JSON.stringify(suppliers));
-    }
-  }, [suppliers]);
-
   // Handle Add or Edit Supplier
-  const handleSaveSupplier = () => {
+  const handleSaveSupplier = async () => {
     if (editSupplierId !== null) {
-      const updatedSuppliers = suppliers.map((supplier) =>
-        supplier.id === editSupplierId
-          ? { ...supplier, ...supplierDetails }
-          : supplier
-      );
-      setSuppliers(updatedSuppliers);
-      setEditSupplierId(null); // Reset edit mode
+      try {
+        const updatedSupplier = await updateSupplier(editSupplierId, supplierDetails);
+        setSuppliers(suppliers.map((supplier) => (supplier.id === editSupplierId ? updatedSupplier : supplier)));
+        setEditSupplierId(null); // Reset edit mode
+      } catch (error) {
+        console.error("Error updating supplier", error);
+      }
     } else {
-      const newSupplier = {
-        ...supplierDetails,
-        id: suppliers.length + 1,
-      };
-      setSuppliers([...suppliers, newSupplier]);
+      try {
+        const newSupplier = await addSupplier(supplierDetails);
+        setSuppliers([...suppliers, newSupplier]);
+      } catch (error) {
+        console.error("Error adding supplier", error);
+      }
     }
 
     // Reset form
@@ -58,27 +56,10 @@ const SupplierManagement = () => {
     });
   };
 
-  // Handle Delete Supplier
-  const handleDeleteSupplier = (id) => {
-    const filteredSuppliers = suppliers.filter((supplier) => supplier.id !== id);
-    setSuppliers(filteredSuppliers);
-    setIsModalOpen(false); 
-  };
-
-  // Handle Edit Supplier (opens modal)
-  const openModal = (supplier) => {
-    setSelectedSupplier(supplier); 
-    setIsModalOpen(true); 
-  };
-
-  const closeModal = () => {
-    setIsModalOpen(false); 
-  };
-
   return (
     <div>
       <NavBar />
-      <div className="container custom-margins" style={{ marginTop: "150px" }}>
+      <div className="container custom-margins" style={{ marginTop: "70px", marginLeft: '250px', padding: '20px', width: 'auto', overflow: 'hidden', height: '100vh' }}>
         <h2 className="text-center">Supplier Management</h2>
 
         {/* Supplier Form to Add or Edit Supplier */}
@@ -183,7 +164,6 @@ const SupplierManagement = () => {
                     <th>Address</th>
                     <th>Outstanding Payments</th>
                     <th>Pending Deliveries</th>
-                    <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -194,14 +174,6 @@ const SupplierManagement = () => {
                       <td>{supplier.address}</td>
                       <td>{supplier.outstandingPayments ? "Yes" : "No"}</td>
                       <td>{supplier.pendingDeliveries ? "Yes" : "No"}</td>
-                      <td>
-                      <button
-                          className="btn btn-warning"
-                          onClick={() => openModal(supplier)} 
-                        >
-                          Modify
-                        </button>
-                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -209,49 +181,7 @@ const SupplierManagement = () => {
             </div>
           </div>
         </div>
-
-        {/* Supplier Details Modal */}
-        {isModalOpen && selectedSupplier && (
-          <div className="modal fade show" style={{ display: "block" }} tabIndex="-1" role="dialog" aria-labelledby="supplierModalLabel" aria-hidden="true">
-            <div className="modal-dialog" role="document">
-              <div className="modal-content">
-                <div className="modal-header">
-                  <h5 className="modal-title" id="supplierModalLabel">Supplier Details</h5>
-                  <button type="button" className="btn-close" onClick={closeModal}></button>
-                </div>
-                <div className="modal-body">
-                  <p><strong>Name:</strong> {selectedSupplier.name}</p>
-                  <p><strong>Contact:</strong> {selectedSupplier.contact}</p>
-                  <p><strong>Address:</strong> {selectedSupplier.address}</p>
-                  <p><strong>Outstanding Payments:</strong> {selectedSupplier.outstandingPayments ? "Yes" : "No"}</p>
-                  <p><strong>Pending Deliveries:</strong> {selectedSupplier.pendingDeliveries ? "Yes" : "No"}</p>
-                </div>
-                <div className="modal-footer">
-                  <button
-                    type="button"
-                    className="btn btn-danger"
-                    onClick={() => handleDeleteSupplier(selectedSupplier.id)}
-                  >
-                    Delete
-                  </button>
-                  <button
-                    type="button"
-                    className="btn btn-primary"
-                    onClick={() => {
-                      setSupplierDetails(selectedSupplier);
-                      setEditSupplierId(selectedSupplier.id);
-                      closeModal();
-                    }}
-                  >
-                    Edit
-                  </button>
-                  <button type="button" className="btn btn-secondary" onClick={closeModal}>Close</button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
+        </div>
     </div>
   );
 };

@@ -97,8 +97,14 @@ const StockAdd = () => {
   return (
     <div>
       <NavBar />
-      <Container className="container custom-margins" style={{ marginTop: "150px" }}>
-        <h1 className="my-4 text-center text-primary">Add Stock</h1>
+      <Container className="container custom-margins"  style={{
+          marginLeft: '250px',
+          padding: '20px',
+          width: 'auto',
+          overflow: 'hidden',
+          height: '100vh',
+        }}>
+        <h1 className="my-4 text-center text-primary ">Add Stock</h1>
 
         {message && <Alert variant={message.variant} className="text-center">{message.text}</Alert>}
 
