@@ -14,18 +14,10 @@ const orderRoutes = require('./routes/orderRoutes');
 const itemRoutes = require('./routes/itemRoutes');
 const stockCategoryRoutes = require('./routes/stockCategoryRoutes');
 const stockSummaryRoutes = require('./routes/stockSummaryRoutes');
-const ironRoutes = require('./routes/iron');
-const cementRoutes = require('./routes/cement');
-const pipesRoutes = require('./routes/pipes');
-const sheetsRoutes = require('./routes/sheets');
 const supplierRoutes = require('./routes/SupplierRoutes'); // Import the supplier routes
 
 
-// Set up the routes
-app.use('/api/dashboard/items/iron', ironRoutes);
-app.use('/api/dashboard/items/cement', cementRoutes);
-app.use('/api/dashboard/items/pipes', pipesRoutes);
-app.use('/api/dashboard/items/sheets', sheetsRoutes);
+
 app.use('/api/dashboard/customers', customerRoutes);
 app.use('/api/dashboard/orders', orderRoutes);
 app.use('/api/dashboard/items', itemRoutes);

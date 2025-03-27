@@ -226,16 +226,16 @@ exports.addBrand = async (req, res) => {
 exports.getBrandDetails = (req, res) => {
   try {
       // Ensure that req.params has the required fields
-      const { itemId, brandName } = req.params;
+      const { itemId, brandsName } = req.params;
 
-      if (!itemId || !brandName) {
+      if (!itemId || !brandsName) {
           return res.status(400).json({ error: "Item ID or Brand Name is missing" });
       }
 
       // Your logic to fetch the item and brand details from DB goes here...
       // Assuming you have a model called 'Item' which is imported at the top
       
-      Item.findOne({ _id: itemId, 'brands.name': brandName }, (err, item) => {
+      Item.findOne({ _id: itemId, 'brands.name': brandsName }, (err, item) => {
           if (err) {
               return res.status(500).json({ error: "Error fetching brand details", details: err.message });
           }
@@ -244,13 +244,13 @@ exports.getBrandDetails = (req, res) => {
           }
 
           // Find the brand within the found item
-          const brand = item.brands.find(b => b.name === brandName);
-          if (!brand) {
+          const brands = item.brands.find(b => b.name === brandsName);
+          if (!brands) {
               return res.status(404).json({ error: "Brand not found" });
           }
 
           // Return the brand details in the response
-          res.status(200).json({ brand });
+          res.status(200).json({ brands});
       });
 
   } catch (error) {
