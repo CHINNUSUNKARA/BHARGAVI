@@ -47,7 +47,7 @@ ul.list-unstyled {
 .custom-navbar {
     background-color: #88add4; /* Light gray background color */
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow effect */
-    padding: 15px 20px; /* Add padding to give more space inside the navbar */
+    padding: 10px 20px; /* Add padding to give more space inside the navbar */
     z-index: 2; /* Ensure the navbar stays above other content */
   }
   

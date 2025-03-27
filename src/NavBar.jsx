@@ -19,7 +19,7 @@ const NavBar = () => {
       <nav className="navbar navbar-expand-lg navbar-light bg- fixed-top custom-navbar">
   <div className="container d-flex justify-content-between align-items-center">
     {/* Logo */}
-    <img src="/" alt="logo" className="navbar-logo" />
+    <img src="/assets/logo.png" alt="logo" className="navbar-logo" />
 
     {/* Social Media Icons */}
     <div className="social-icons text-center">

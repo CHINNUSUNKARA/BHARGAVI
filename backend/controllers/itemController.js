@@ -2,17 +2,66 @@
 const mongoose = require('mongoose');
 const Item = require('../models/Item');
 
+/*
+  Helper functions for dual lookup.
+  These functions try to find a nested subdocument (brand or category)
+  using an ObjectId if the parameter is valid; otherwise, they fall back
+  to a case‑insensitive lookup by name.
+*/
+
+// Find a brand from an item using either its ObjectId or its name.
+const getBrandFromItem = (item, brandParam) => {
+  let brand;
+  if (mongoose.Types.ObjectId.isValid(brandParam)) {
+    brand = item.brands.id(brandParam);
+  }
+  if (!brand) {
+    brand = item.brands.find(b => b.name.toLowerCase() === brandParam.toLowerCase());
+  }
+  return brand;
+};
+
+// Find a category from a brand using either its ObjectId or its name.
+const getCategoryFromBrand = (brand, categoryParam) => {
+  let category;
+  if (mongoose.Types.ObjectId.isValid(categoryParam)) {
+    category = brand.categories.id(categoryParam);
+  }
+  if (!category) {
+    category = brand.categories.find(c => c.name.toLowerCase() === categoryParam.toLowerCase());
+  }
+  return category;
+};
+
+/*==========================
+   ITEM CONTROLLERS
+==========================*/
+
 // CREATE a new Item (with nested brands/categories if provided)
 exports.createItem = async (req, res) => {
   try {
-    const newItem = new Item(req.body);
-    await newItem.save();
-    res.status(201).json(newItem);
+    const { name, brands } = req.body;
+
+    // Validate the input
+    if (!name) {
+      return res.status(400).json({ error: "The `name` field is required" });
+    }
+
+    // Create a new item
+    const newItem = new Item({
+      name,
+      brands,
+    });
+
+    // Save the item to the database
+    const savedItem = await newItem.save();
+    res.status(201).json(savedItem);
   } catch (error) {
-    console.error('Error saving new item:', error);
-    res.status(500).json({ error: 'Failed to save new item', details: error.message });
+    console.error("Error saving new item:", error);
+    res.status(500).json({ error: "Failed to create item", details: error.message });
   }
 };
+
 
 // GET all Items
 exports.getAllItems = async (req, res) => {
@@ -25,21 +74,17 @@ exports.getAllItems = async (req, res) => {
   }
 };
 
+// GET a single Item by id or by name (fallback)
 exports.getItem = async (req, res) => {
   try {
-    const param = req.params.id; // Use 'id' as defined in the route
+    const param = req.params.id; // use 'id' from route (/id/:id)
     let item;
-
-    // Check if the parameter is a valid ObjectId
     if (mongoose.Types.ObjectId.isValid(param)) {
       item = await Item.findById(param);
     }
-
-    // If no item found by ID, try looking up by name (case insensitive)
     if (!item) {
       item = await Item.findOne({ name: new RegExp(`^${param}$`, "i") });
     }
-
     if (!item) {
       return res.status(404).json({ error: "Item not found" });
     }
@@ -50,8 +95,7 @@ exports.getItem = async (req, res) => {
   }
 };
 
-
-// Get an item by its name (exact match, case insensitive)
+// GET an Item by its name (exact match, case insensitive)
 exports.getItemByName = async (req, res) => {
   try {
     const { itemName } = req.params;
@@ -65,38 +109,6 @@ exports.getItemByName = async (req, res) => {
     res.status(500).json({ error: "Failed to fetch item by name" });
   }
 };
-
-
-
-// Get an item by its name and filter brands by a search keyword
-// controllers/itemController.js
-exports.getBrandsByItemName = async (req, res) => {
-  try {
-    const { id } = req.params; // Parameter from route
-
-    let item;
-
-    // Check if the parameter is a valid ObjectId
-    if (mongoose.Types.ObjectId.isValid(id)) {
-      // Try finding the item by its ObjectId
-      item = await Item.findById(id);
-    } else {
-      // If not a valid ObjectId, try finding by name (case-insensitive)
-      item = await Item.findOne({ name: new RegExp(`^${id}$`, "i") });
-    }
-
-    if (!item) {
-      return res.status(404).json({ error: "Item not found" });
-    }
-
-    // Return only the brands array
-    res.json(item.brands);
-  } catch (error) {
-    console.error("Error fetching brands:", error);
-    res.status(500).json({ error: "Failed to fetch brands" });
-  }
-};
-
 
 // UPDATE an existing Item by id
 exports.updateItem = async (req, res) => {
@@ -122,25 +134,68 @@ exports.deleteItem = async (req, res) => {
   }
 };
 
-// UPDATE a Brand within an Item
-exports.updateBrand = async (req, res) => {
+/*==========================
+   BRAND CONTROLLERS (Nested in Item)
+==========================*/
+
+// GET a single Brand from an Item (by id or name)
+exports.getBrand = async (req, res) => {
   try {
-    const { itemId, brandId } = req.params;
-    const { name, categories } = req.body;
-    const item = await Item.findById(itemId);
-    if (!item) return res.status(404).json({ error: 'Item not found' });
+    const param = req.params.brandName; // use 'brandName' from route
 
-    const brand = item.brands.id(brandId);
-    if (!brand) return res.status(404).json({ error: 'Brand not found' });
+    let item = await Item.findById(req.params.id); // Fetch the item first
+    if (!item) {
+      return res.status(404).json({ error: "Item not found" });
+    }
 
-    // Update provided fields
-    if (name) brand.name = name;
-    if (categories) brand.categories = categories;
-    await item.save();
+    const brand = getBrandFromItem(item, param);
+    if (!brand) {
+      return res.status(404).json({ error: "Brand not found" });
+    }
     res.json(brand);
   } catch (error) {
-    console.error('Error updating brand:', error);
-    res.status(500).json({ error: 'Failed to update brand', details: error.message });
+    console.error("Error fetching brand:", error);
+    res.status(500).json({ error: "Failed to fetch brand" });
+  }
+};
+
+exports.getBrandByName = async (req, res) => {
+  try {
+    const { brandName } = req.params;
+    const brand = await getBrandFromItem.findOne({ name: new RegExp(`^${brandName}$`, "i") });
+    if (!brand) {
+      return res.status(404).json({ error: "brand not found" });
+    }
+    res.json(brand);
+  } catch (error) {
+    console.error("Error fetching brand by name:", error);
+    res.status(500).json({ error: "Failed to fetch brand by name" });
+  }
+};
+
+// GET all Brands for an Item (lookup by id or name)
+exports.getBrandsByItemName = async (req, res) => {
+  try {
+    const { id, itemName } = req.params; // Extract id and itemName from params
+    let item;
+
+    // Handle lookup by ObjectId or itemName
+    if (id && mongoose.Types.ObjectId.isValid(id)) {
+      item = await Item.findById(id);
+    } else if (itemName) {
+      item = await Item.findOne({ name: new RegExp(`^${itemName}$`, "i") }); // Case-insensitive name search
+    } else {
+      return res.status(400).json({ error: "Invalid or missing parameters" });
+    }
+
+    // Check if item was found
+    if (!item) return res.status(404).json({ error: "Item not found" });
+
+    // Respond with the brands
+    res.json(item.brands);
+  } catch (error) {
+    console.error("Error fetching brands:", error);
+    res.status(500).json({ error: "Failed to fetch brands", details: error.message });
   }
 };
 
@@ -152,7 +207,6 @@ exports.addBrand = async (req, res) => {
     const item = await Item.findById(itemId);
     if (!item) return res.status(404).json({ error: 'Item not found' });
 
-    // Create a new brand subdocument.
     const newBrand = {
       _id: new mongoose.Types.ObjectId(),
       name,
@@ -168,17 +222,75 @@ exports.addBrand = async (req, res) => {
   }
 };
 
-// DELETE a Brand within an Item
+// GET a specific Brand within an Item (by id or name)
+exports.getBrandDetails = (req, res) => {
+  try {
+      // Ensure that req.params has the required fields
+      const { itemId, brandName } = req.params;
+
+      if (!itemId || !brandName) {
+          return res.status(400).json({ error: "Item ID or Brand Name is missing" });
+      }
+
+      // Your logic to fetch the item and brand details from DB goes here...
+      // Assuming you have a model called 'Item' which is imported at the top
+      
+      Item.findOne({ _id: itemId, 'brands.name': brandName }, (err, item) => {
+          if (err) {
+              return res.status(500).json({ error: "Error fetching brand details", details: err.message });
+          }
+          if (!item) {
+              return res.status(404).json({ error: "Item or Brand not found" });
+          }
+
+          // Find the brand within the found item
+          const brand = item.brands.find(b => b.name === brandName);
+          if (!brand) {
+              return res.status(404).json({ error: "Brand not found" });
+          }
+
+          // Return the brand details in the response
+          res.status(200).json({ brand });
+      });
+
+  } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: "Failed to fetch brand details", details: error.message });
+  }
+};
+
+
+// UPDATE a Brand within an Item (by id or name)
+exports.updateBrand = async (req, res) => {
+  try {
+    const { itemId, brandId} = req.params;
+    const { name, categories } = req.body;
+    const item = await Item.findById(itemId);
+    if (!item) return res.status(404).json({ error: 'Item not found' });
+
+    const brand = getBrandFromItem(item, brandId );
+    if (!brand) return res.status(404).json({ error: 'Brand not found' });
+
+    if (name) brand.name = name;
+    if (categories) brand.categories = categories;
+    await item.save();
+    res.json(brand);
+  } catch (error) {
+    console.error('Error updating brand:', error);
+    res.status(500).json({ error: 'Failed to update brand', details: error.message });
+  }
+};
+
+// DELETE a Brand within an Item (by id or name)
 exports.deleteBrand = async (req, res) => {
   try {
     const { itemId, brandId } = req.params;
     const item = await Item.findById(itemId);
     if (!item) return res.status(404).json({ error: 'Item not found' });
 
-    const brand = item.brands.id(brandId);
+    const brand = getBrandFromItem(item, brandId);
     if (!brand) return res.status(404).json({ error: 'Brand not found' });
 
-    // Remove the brand subdocument
     brand.remove();
     await item.save();
     res.status(204).send();
@@ -188,17 +300,21 @@ exports.deleteBrand = async (req, res) => {
   }
 };
 
+/*==========================
+   CATEGORY CONTROLLERS (Nested in Brand)
+==========================*/
+
 // ADD a Category to a Brand within an Item
 exports.addCategory = async (req, res) => {
   try {
     const { itemId, brandId } = req.params;
-    const { name } = req.body; // assuming category consists of a name property
+    const { name } = req.body; // Assuming a category is defined by a name
     if (!name) return res.status(400).json({ error: 'Category name is required' });
 
     const item = await Item.findById(itemId);
     if (!item) return res.status(404).json({ error: 'Item not found' });
 
-    const brand = item.brands.id(brandId);
+    const brand = getBrandFromItem(item, brandId);
     if (!brand) return res.status(404).json({ error: 'Brand not found' });
 
     const newCategory = { _id: new mongoose.Types.ObjectId(), name };
@@ -211,7 +327,36 @@ exports.addCategory = async (req, res) => {
   }
 };
 
-// UPDATE a Category within a Brand
+
+exports.getCategories = async (req, res) => {
+  try {
+    // Expect itemId and either brandId or brandName in parameters
+    const { itemId, brandId, brandName } = req.params;
+
+    // Find the item by its ObjectId
+    const item = await Item.findById(itemId);
+    if (!item) return res.status(404).json({ error: 'Item not found' });
+
+    let brand;
+
+    // Lookup brand by ID or name
+    if (brandId) {
+      brand = item.brands.find((b) => b._id.toString() === brandId);
+    } else if (brandName) {
+      brand = item.brands.find((b) => b.name.toLowerCase() === brandName.toLowerCase());
+    }
+
+    if (!brand) return res.status(404).json({ error: 'Brand not found' });
+
+    // Return the categories array belonging to that brand
+    res.json(brand.categories);
+  } catch (error) {
+    console.error('Error fetching categories:', error);
+    res.status(500).json({ error: 'Failed to fetch categories', details: error.message });
+  }
+};
+
+// UPDATE a Category within a Brand (by id or name)
 exports.updateCategory = async (req, res) => {
   try {
     const { itemId, brandId, categoryId } = req.params;
@@ -219,10 +364,10 @@ exports.updateCategory = async (req, res) => {
     const item = await Item.findById(itemId);
     if (!item) return res.status(404).json({ error: 'Item not found' });
 
-    const brand = item.brands.id(brandId);
+    const brand = getBrandFromItem(item, brandId);
     if (!brand) return res.status(404).json({ error: 'Brand not found' });
 
-    const category = brand.categories.id(categoryId);
+    let category = getCategoryFromBrand(brand, categoryId);
     if (!category) return res.status(404).json({ error: 'Category not found' });
 
     if (name) category.name = name;
@@ -234,17 +379,17 @@ exports.updateCategory = async (req, res) => {
   }
 };
 
-// DELETE a Category within a Brand
+// DELETE a Category within a Brand (by id or name)
 exports.deleteCategory = async (req, res) => {
   try {
     const { itemId, brandId, categoryId } = req.params;
     const item = await Item.findById(itemId);
     if (!item) return res.status(404).json({ error: 'Item not found' });
 
-    const brand = item.brands.id(brandId);
+    const brand = getBrandFromItem(item, brandId);
     if (!brand) return res.status(404).json({ error: 'Brand not found' });
 
-    const category = brand.categories.id(categoryId);
+    const category = getCategoryFromBrand(brand, categoryId);
     if (!category) return res.status(404).json({ error: 'Category not found' });
 
     category.remove();
@@ -256,36 +401,96 @@ exports.deleteCategory = async (req, res) => {
   }
 };
 
-// GET all Categories for a specific Brand in an Item
-exports.getCategories = async (req, res) => {
+/* ===============================
+   PRICE CONTROLLERS (by names)
+   These functions expect:
+     - itemName: e.g. "iron"
+     - brandName: e.g. "Stainsteel"
+     - categoryName: e.g. "Normal"
+   They will search in a case-insensitive way.
+=============================== */
+
+// GET the price from a variant (category) for a given item and brand
+exports.getPriceByNames = async (req, res) => {
   try {
-    const { itemId, brandId } = req.params;
-    const item = await Item.findById(itemId);
-    if (!item) return res.status(404).json({ error: 'Item not found' });
+    const { itemName, brandName, categoryName } = req.params;
+    
+    // Find the item by name (case-insensitive)
+    const item = await Item.findOne({ name: new RegExp(`^${itemName}$`, "i") });
+    if (!item) return res.status(404).json({ error: "Item not found" });
 
-    const brand = item.brands.id(brandId);
-    if (!brand) return res.status(404).json({ error: 'Brand not found' });
+    // Find the brand from the item's brands array
+    const brand = item.brands.find(b => b.name.toLowerCase() === brandName.toLowerCase());
+    if (!brand) return res.status(404).json({ error: "Brand not found" });
 
-    res.json(brand.categories);
+    // Find the category from the brand's categories array
+    const category = brand.categories.find(c => c.name.toLowerCase() === categoryName.toLowerCase());
+    if (!category) return res.status(404).json({ error: "Category not found" });
+
+    res.json({ price: category.price });
   } catch (error) {
-    console.error('Error fetching categories:', error);
-    res.status(500).json({ error: 'Failed to fetch categories', details: error.message });
+    console.error("Error fetching price:", error);
+    res.status(500).json({ error: "Failed to fetch price", details: error.message });
   }
 };
 
-// GET a single Brand from an Item by brandId
-exports.getBrand = async (req, res) => {
+// UPDATE (or add) the price for a given item/brand/category combination
+exports.updatePriceByNames = async (req, res) => {
   try {
-    const { itemId, brandId } = req.params;
-    const item = await Item.findById(itemId);
-    if (!item) return res.status(404).json({ error: 'Item not found' });
+    const { itemName, brandName, categoryName } = req.params;
+    const { price } = req.body;
 
-    const brand = item.brands.id(brandId);
-    if (!brand) return res.status(404).json({ error: 'Brand not found' });
+    // Validate that the price is provided, numeric, and non-negative.
+    if (price === undefined || isNaN(price) || Number(price) < 0) {
+      return res.status(400).json({ error: "A valid non-negative price is required" });
+    }
 
-    res.json(brand);
+    // Find the item by name (case-insensitive)
+    const item = await Item.findOne({ name: new RegExp(`^${itemName}$`, "i") });
+    if (!item) return res.status(404).json({ error: "Item not found" });
+
+    // Find the brand within the item
+    const brand = item.brands.find(b => b.name.toLowerCase() === brandName.toLowerCase());
+    if (!brand) return res.status(404).json({ error: "Brand not found" });
+
+    // Find the category within the brand
+    const category = brand.categories.find(c => c.name.toLowerCase() === categoryName.toLowerCase());
+    if (!category) return res.status(404).json({ error: "Category not found" });
+
+    // Update the price
+    category.price = Number(price);
+    await item.save();
+    res.json({ price: category.price });
   } catch (error) {
-    console.error('Error fetching brand:', error);
-    res.status(500).json({ error: 'Failed to fetch brand', details: error.message });
+    console.error("Error updating price:", error);
+    res.status(500).json({ error: "Failed to update price", details: error.message });
+  }
+};
+
+// DELETE the price for a given item/brand/category combination
+// (Here we simply reset the price to 0; adjust as needed.)
+exports.deletePriceByNames = async (req, res) => {
+  try {
+    const { itemName, brandName, categoryName } = req.params;
+    
+    // Find the item by name (case-insensitive)
+    const item = await Item.findOne({ name: new RegExp(`^${itemName}$`, "i") });
+    if (!item) return res.status(404).json({ error: "Item not found" });
+    
+    // Find the brand
+    const brand = item.brands.find(b => b.name.toLowerCase() === brandName.toLowerCase());
+    if (!brand) return res.status(404).json({ error: "Brand not found" });
+    
+    // Find the category
+    const category = brand.categories.find(c => c.name.toLowerCase() === categoryName.toLowerCase());
+    if (!category) return res.status(404).json({ error: "Category not found" });
+    
+    // Reset the price (or remove it depending on your business logic)
+    category.price = 0;
+    await item.save();
+    res.status(204).send();
+  } catch (error) {
+    console.error("Error deleting price:", error);
+    res.status(500).json({ error: "Failed to delete price", details: error.message });
   }
 };

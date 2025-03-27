@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import NavBar from "./NavBar";
+import { toast } from 'react-toastify'; // Toast for better feedback
+import 'react-toastify/dist/ReactToastify.css';
 
 const CustomerManagement = () => {
   const [customers, setCustomers] = useState([]); // Store customers
@@ -39,6 +41,10 @@ const CustomerManagement = () => {
     if (searchTerm) {
       const filtered = customers.filter((customer) =>
         customer.name.toLowerCase().includes(searchTerm.toLowerCase())
+       || customer.surname.toLowerCase().includes(searchTerm.toLowerCase()) 
+       || customer.email.toLowerCase().includes(searchTerm.toLowerCase()) 
+       || customer.phone.toLowerCase().includes(searchTerm.toLowerCase()) 
+       || customer.address.toLowerCase().includes(searchTerm.toLowerCase())
       );
       setFilteredCustomers(filtered);
     } else {
@@ -48,6 +54,7 @@ const CustomerManagement = () => {
 
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
+    
   };
 
   // Open the modal to edit the customer
